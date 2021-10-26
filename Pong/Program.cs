@@ -5,87 +5,69 @@ using OpenTK.Input;
 
 namespace Pong
 {
+
     class Program : GameWindow
     {
-        int xDaBola = 0;
-        int yDaBola = 0;
-        int tamanhoDaBola = 20;
+        Retangulo bola;
+
         int velocidadeDaBolaEmX = 3;
         int velocidadeDaBolaEmY = 3;
 
-        int yDoJogador1 = 0;
-        int yDoJogador2 = 0;
-
-        int xDoJogador1()
-        {
-            return -ClientSize.Width / 2 + larguraDosJogadores() / 2;
-        }
-        int xDoJogador2()
-        {
-            return ClientSize.Width / 2 - larguraDosJogadores() / 2;
-        }
-
-        int larguraDosJogadores()
-        {
-            return tamanhoDaBola;
-        }
-
-        int alturaDosJogadores()
-        {
-            return 3 * tamanhoDaBola;
-        }
+        Retangulo jogador1;
+        Retangulo jogador2;
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            xDaBola += velocidadeDaBolaEmX;
-            yDaBola += velocidadeDaBolaEmY;
+            bola.x += velocidadeDaBolaEmX;
+            bola.y += velocidadeDaBolaEmY;
 
-            if (xDaBola + tamanhoDaBola / 2 > xDoJogador2() - larguraDosJogadores() / 2
-                && yDaBola - tamanhoDaBola / 2 < yDoJogador2 + alturaDosJogadores() / 2
-                && yDaBola + tamanhoDaBola / 2 > yDoJogador2 - alturaDosJogadores() / 2)
-            {
-                velocidadeDaBolaEmX = -velocidadeDaBolaEmX;
-            }
-            if (xDaBola - tamanhoDaBola / 2 < xDoJogador1() + larguraDosJogadores() / 2
-                && yDaBola - tamanhoDaBola / 2 < yDoJogador1 + alturaDosJogadores() / 2
-                && yDaBola + tamanhoDaBola / 2 > yDoJogador1 - alturaDosJogadores() / 2)
+            if (bola.x + bola.largura / 2 > jogador2.x - jogador2.largura / 2
+                && bola.y - bola.altura / 2 < jogador2.y + jogador2.altura / 2
+                && bola.y + bola.altura / 2 > jogador2.y - jogador2.altura / 2)
             {
                 velocidadeDaBolaEmX = -velocidadeDaBolaEmX;
             }
 
-            if (yDaBola + tamanhoDaBola / 2 > ClientSize.Height / 2)
+            if (bola.x - bola.largura / 2 < jogador1.x + jogador2.largura / 2
+                && bola.y - bola.altura / 2 < jogador1.y + jogador2.altura / 2
+                && bola.y + bola.altura / 2 > jogador1.y - jogador2.altura / 2)
+            {
+                velocidadeDaBolaEmX = -velocidadeDaBolaEmX;
+            }
+
+            if (bola.y + bola.altura / 2 > ClientSize.Height / 2)
             {
                 velocidadeDaBolaEmY = -velocidadeDaBolaEmY;
             }
-            if (yDaBola - tamanhoDaBola / 2 < -ClientSize.Height / 2)
+            if (bola.y - bola.altura / 2 < -ClientSize.Height / 2)
             {
                 velocidadeDaBolaEmY = -velocidadeDaBolaEmY;
             }
 
-            if (xDaBola < -ClientSize.Width / 2 || xDaBola > ClientSize.Width / 2)
+            if (bola.x < -ClientSize.Width / 2 || bola.x > ClientSize.Width / 2)
             {
-                xDaBola = 0;
-                yDaBola = 0;
+                bola.x = 0;
+                bola.y = 0;
             }
 
             if (Keyboard.GetState().IsKeyDown(Key.W))
             {
-                yDoJogador1 += 5;
+                jogador1.y += 5;
             }
 
             if (Keyboard.GetState().IsKeyDown(Key.S))
             {
-                yDoJogador1 -= 5;
+                jogador1.y -= 5;
             }
 
             if (Keyboard.GetState().IsKeyDown(Key.Up))
             {
-                yDoJogador2 += 5;
+                jogador2.y += 5;
             }
 
             if (Keyboard.GetState().IsKeyDown(Key.Down))
             {
-                yDoJogador2 -= 5;
+                jogador2.y -= 5;
             }
 
 
@@ -101,9 +83,9 @@ namespace Pong
 
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            DesenharRetangulo(xDaBola, yDaBola, tamanhoDaBola, tamanhoDaBola, 1.0f, 1.0f, 0.0f);
-            DesenharRetangulo(xDoJogador1(), yDoJogador1, larguraDosJogadores(), alturaDosJogadores(), 1.0f, 0.0f, 0.0f);
-            DesenharRetangulo(xDoJogador2(), yDoJogador2, larguraDosJogadores(), alturaDosJogadores(), 0.0f, 0.0f, 1.0f);
+            DesenharRetangulo(bola.x, bola.y, bola.largura, bola.altura, 1.0f, 1.0f, 0.0f);
+            DesenharRetangulo(jogador1.x, jogador1.y, jogador1.largura, jogador1.altura, 1.0f, 0.0f, 0.0f);
+            DesenharRetangulo(jogador2.x, jogador2.y, jogador2.largura, jogador2.altura, 0.0f, 0.0f, 1.0f);
 
 
 
@@ -122,9 +104,30 @@ namespace Pong
 
             GL.End();
         }
-        static void Main(string[] args)
+
+        static Retangulo CriarRetangulo(int x, int y, int largura, int altura)
         {
-            new Program().Run();
+            Retangulo r = new Retangulo();
+            r.x = x;
+            r.y = y;
+            r.largura = largura;
+            r.altura = altura;
+
+            return r;
+        }
+
+        static void Main()
+        {
+
+            Program p = new Program();
+
+            int larguraDosJogadores = p.bola.largura;
+            int alturaDosJogadores = p.bola.altura * 3;
+
+            p.bola = CriarRetangulo(0, 0, 20, 20);
+            p.jogador1 = CriarRetangulo(-p.ClientSize.Width / 2 + larguraDosJogadores / 2, 0, larguraDosJogadores, alturaDosJogadores);
+            p.jogador2 = CriarRetangulo(p.ClientSize.Width / 2 - larguraDosJogadores / 2, 0, larguraDosJogadores, alturaDosJogadores);
+            p.Run();
         }
     }
 }
